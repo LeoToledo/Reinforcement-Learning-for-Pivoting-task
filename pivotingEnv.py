@@ -15,14 +15,14 @@ class InvertedPendulumEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         #Enquanto não cair, mas não completar o objetivo, a reward é -1
         if(ob[4] > 0.07): 
             reward = -1
-        #Quando cair, a reward é -5
+        #Quando cair, a reward é -1
         elif(ob[4] <= 0.07):
-            reward = -5
+            reward = -2
         #Caso atinja o ângulo desejado, a reward deve ser modelada no código principal
         #Modelando se done é True ou não. Quando o objeto cair, done==1. O caso de limite de tempo deve ser modelado no código principal
         done = 0
-        if(reward == -5):
-            done = 1
+        if(reward == -2):
+            done = 0
         
         return ob, reward, done, {}
 
@@ -35,17 +35,25 @@ class InvertedPendulumEnv(mujoco_env.MujocoEnv, utils.EzPickle):
     def _get_obs(self):
         obs = np.concatenate([self.sim.data.qpos]).ravel()
         #Vamos converter o angulo da ferramenta para graus
+#        conv_rad = obs[5]
         conv_rad = np.arctan2(2*(obs[5]*obs[8] + obs[6]*obs[7]), (1 - 2*(obs[7]**2 + obs[8]**2)))
         obs_degrees = 180*conv_rad/np.pi
+        
         obs[5] = obs_degrees
+        
         #Convertendo o Hinge do Arm para Graus
         obs[0] = 180*obs[0]/np.pi
+        
+        #obs[0] será o ângulo relativo em graus
+#        obs[0] = obs[5] - obs[0]
+        
         return obs
 
     def viewer_setup(self):
         v = self.viewer
         v.cam.trackbodyid = 0
         v.cam.distance = self.model.stat.extent + 0.5
+    
 
 
 ###########################
