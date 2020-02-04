@@ -40,23 +40,23 @@
 		<!--  ================= ARM MASTER ================= /-->
 		<body name="upperarm" pos="0 0 0.6">
 			<geom class="0" type="cylinder" fromto="0 0 0 0 0 -0.345" size="0.05"/>
-			<joint class='arm' name="s_rotation" type="hinge" pos="0 0 0" axis="0 0 1" range="-.85 .85" user="003"/>
+			<joint class='arm' name="s_rotation" type="hinge" pos="0 0 0" axis="0 0 1" range="-1.0471976 1.0471976" user="003"/>
 
 			<!--  ================= ARM ================= /-->
-			<body name="forearm" pos="-0.01 0 -0.405">
-				<geom class="0" type="box" fromto="0 0 0 0.225 0 0" size="0.06"/>
+			<body name="forearm" pos="0.05 0 -0.390">
+				<geom class="0" type="box"  size="0.1 .07 .045"/>
 				
 				<!--  ================= Gripper Master ================= /-->
 				<body name="gripperMaster" pos="0.225 0 0.045">
 					
 					<!--  ================= Gripper1 ================= /-->
-					<body name="gripper1" pos="0 0 -0.039">
-						<geom class="0" type="box" size="0.1 0.025 0.01"  rgba="0.4 0.6 0.5 0.9"/>
-						<joint class='arm' name="gripper" type="slide" pos="0 0 0" axis="0 0 1" range="-.85 .85" user="003"/> 
+					<body name="gripper1" pos="-0.065 0.0 -0.04">
+						<geom class="0" type="box" size="0.06 0.035 0.004"  rgba="0.4 0.6 0.5 0.9"/>
+						<joint class='arm' name="gripper" type="slide" pos="0 0 0" axis="0 0 1" range="-0.6 0.01" user="003"/> 
 					</body>
 					<!--  ================= gripper2 ================= /-->
-					<body name="gripper2" pos="0 0 -0.09">
-						<geom class="0" type="box" size="0.1 0.025 0.01" rgba="0.5 0.6 0.8 1" contype="1" conaffinity="1"/>
+					<body name="gripper2" pos="-0.065 0.0 -0.06">
+						<geom class="0" type="box" size="0.06 0.035 0.004" rgba="0.5 0.6 0.8 1" contype="1" conaffinity="1"/>
 					</body>
 
 				</body>
@@ -68,8 +68,8 @@
 
 		
 		<!--  ================= OBJECT ================= / -->
-		<body name="object" pos="0.15 0 0.175">
-			<geom class="0" type="box" fromto="0.22 0 0 0.1 0 0" size="0.015" rgba="0.2 0.2 0.7 1" contype="1" conaffinity="1"/>
+		<body name="object" pos="0.268 0 0.205">
+			<geom class="0" type="box" size="0.055 .013 .006" rgba="0.2 0.2 0.7 1" contype="1" conaffinity="1"/>
 			<joint name="fr" type="free" limited='false' damping="0" armature="0" user="010"/>	
 
 		</body>  
@@ -80,8 +80,9 @@
 	
 	<actuator>
 		
-		<position joint='s_rotation' 	name='As_rotation' 	kp="50" ctrlrange='-1 1'/>
-		<position joint='gripper' 	name='Gripper' 	kp="100" ctrlrange='-.85 0.85'/> 		
+		<!--  ================= O range de rotação é de mais ou menos 60° ================= / -->
+		<position joint='s_rotation' 	name='As_rotation' 	kp="70" ctrlrange='--1.0471976 1.0471976'/>
+		<position joint='gripper' 	name='Gripper' 	kp="60" ctrlrange='-0.6 0.01'/> 			
 	</actuator>
 
 </mujoco>
