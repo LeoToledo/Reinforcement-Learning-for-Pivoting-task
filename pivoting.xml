@@ -79,7 +79,7 @@
 			<geom class="0" type="box" size="0.215 .12 .006" rgba="0.1 0.1 0.0 1" contype="1" conaffinity="1"/>
 			<joint name="fr" type="free" limited='false' damping="0" armature="0" user="010"/>	
 
-		</body>
+		</body> 
 		
 	
 	</worldbody>
@@ -87,8 +87,8 @@
 	<actuator>
 		
 		<!--  ================= O range de rotação é de mais ou menos 60° ================= / -->
-		<position joint='s_rotation' 	name='As_rotation' 	kp="70" ctrlrange='-1.0471976 1.0471976'/>
-		<position joint='gripper' 	name='Gripper' 	kp="60" ctrlrange='-0.7 0.0008'/> 			
+		<position joint='s_rotation' 	name='As_rotation' 	kp="40" ctrlrange='-1.0471976 1.0471976'/>
+		<position joint='gripper' 	name='Gripper' 	kp="60" ctrlrange='-0.7 0.0008'/> 				
 	</actuator>
 
 </mujoco>
