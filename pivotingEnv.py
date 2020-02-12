@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 class InvertedPendulumEnv(mujoco_env.MujocoEnv, utils.EzPickle):
     def __init__(self):
         ##################################################################
-        self.desired_angle = 15
+        self.desired_angle = 30
         self.counter = 0
         self.vel = 0
         self.vel_ant = 0
@@ -21,18 +21,23 @@ class InvertedPendulumEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         
     #Modelando a reward      
         #Verificando a velocidade com a qual ele chega no objetivo
-        self.vel = (ob[0] - self.vel_ant)
+        self.vel = (ob[1] - self.vel_ant)
         #print(self.vel) 
-        #Caso complete o objetivo   
-        if(ob[0] >= self.desired_angle - 1 and ob[0] <= self.desired_angle + 1): 
-             
-            reward = (-1)*np.abs(ob[0] - self.desired_angle)/100
-            
+        
+        #Prints para verificar se a trajetória está muito rápida ou não
+        #print("RELATIVO: ",ob[0])
+        #print("GRIPPER: ", ob[1]) 
+         
+        #Caso complete o objetivo
+        if(ob[0] >= self.desired_angle - 1 and ob[0] <= self.desired_angle + 1 and ob[1] < 0.002): 
+ 
+            reward = (-1)*np.abs(ob[0] - self.desired_angle)/300
+        
             self.counter = self.counter + 1
             done = 0
             if(self.counter > 60):
                 reward = 10
-                print("******************Completou********************")
+                print("*********************Completou***********************")
                 done = 1
                 self.counter = 0
                 return ob, reward, done, {}
@@ -43,7 +48,7 @@ class InvertedPendulumEnv(mujoco_env.MujocoEnv, utils.EzPickle):
             reward = (-1)*np.abs(ob[0] - self.desired_angle)/100
             done = 0
         #Atualizando a velocidade antiga
-        self.vel_ant = ob[0]
+        self.vel_ant = ob[1]
         
         return ob, reward, done, {}
 
@@ -73,7 +78,7 @@ class InvertedPendulumEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         relative_angle = obs[5] - obs[0]
         
         #A única observação que o ambiente deve dar é o ângulo relativo entre a ferramenta e o gripper
-        obs_final = np.concatenate([ [relative_angle] ]).ravel()
+        obs_final = np.concatenate([ [relative_angle] , [obs[0]]]).ravel()
         
         return obs_final
 
@@ -99,3 +104,4 @@ class InvertedPendulumEnv(mujoco_env.MujocoEnv, utils.EzPickle):
 ###########################
 #Para achar o ângulo da ferramenta relativamente ao braço, faça obs[5]-obs[0]
 #Para saber se a ferramenta caiu, verificar de obs[4] > 0.07 (Não caiu)
+

@@ -40,7 +40,7 @@
 		<!--  ================= ARM MASTER ================= /-->
 		<body name="upperarm" pos="0 0 0.6">
 			<geom class="0" type="cylinder" fromto="0 0 0 0 0 -0.345" size="0.045"/>
-			<joint class='arm' name="s_rotation" type="hinge" pos="0 0 0" axis="0 0 1" range="-1.0471976 1.0471976" user="003"/>
+			<joint class='arm' name="s_rotation" type="hinge" pos="0 0 0" axis="0 0 1" range="-0.698132 0.698132" user="003"/>
 
 			<!--  ================= ARM ================= /-->
 			<body name="forearm" pos="0.07 0 -0.390">
@@ -52,7 +52,7 @@
 					<!--  ================= Gripper1 ================= /-->
 					<body name="gripper1" pos="-0.1 0.0 -0.04">
 						<geom class="0" type="box" size="0.1 0.05 0.004"  rgba=".8 .4 .1 1"/>
-						<joint class='arm' name="gripper" type="slide" pos="0 0 0" axis="0 0 1" range="-0.7 0.0008" user="003"/> 
+						<joint class='arm' name="gripper" type="slide" pos="0 0 0" axis="0 0 1" range="-0.7 0.003" user="003"/> 
 					</body>
 					<!--  ================= gripper2 ================= /-->
 					<body name="gripper2" pos="-0.1 0.0 -0.06">
@@ -87,8 +87,8 @@
 	<actuator>
 		
 		<!--  ================= O range de rotação é de mais ou menos 60° ================= / -->
-		<position joint='s_rotation' 	name='As_rotation' 	kp="40" ctrlrange='-1.0471976 1.0471976'/>
-		<position joint='gripper' 	name='Gripper' 	kp="60" ctrlrange='-0.7 0.0008'/> 				
+		<position joint='s_rotation' 	name='As_rotation' 	kp="20" ctrlrange='-0.698132 0.698132' forcelimited='true' forcerange='-13 13'/>
+		<position joint='gripper' 	name='Gripper' 	kp="70" ctrlrange='-0.7 0.003'/> 				
 	</actuator>
 
 </mujoco>
