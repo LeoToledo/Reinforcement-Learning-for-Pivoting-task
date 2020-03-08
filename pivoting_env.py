@@ -8,7 +8,7 @@ class InvertedPendulumEnv(mujoco_env.MujocoEnv, utils.EzPickle):
 
     def __init__(self):
         utils.EzPickle.__init__(self)
-        mujoco_env.MujocoEnv.__init__(self, 'pivotingTeste.xml', 2)
+        mujoco_env.MujocoEnv.__init__(self, 'pivoting.xml', 2)
     
     def step(self, a):
         self.do_simulation(a, self.frame_skip)
@@ -54,7 +54,7 @@ class InvertedPendulumEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         #print(vel_rel)
 
         #A única observação que o ambiente deve dar é o ângulo relativo entre a ferramenta e o gripper
-        obs_final = np.concatenate([ [relative_angle] , [obs[1]], [vel_gripper] ]).ravel()
+        obs_final = np.concatenate([ [relative_angle] , [obs[1]], [vel_gripper], [vel_rel[5]-vel_gripper]]).ravel()
         
         return obs_final
 

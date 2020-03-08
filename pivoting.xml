@@ -5,9 +5,9 @@
 	<size 	nuser_jnt="1"
 			nuser_geom="1"/>
 
-	<option	timestep="0.004"
+	<option	timestep="0.002"
 			gravity="0 0 -9.81"
-			viscosity="0"
+			viscosity="0.00002"
 			iterations="20"/>
 	
 	<asset>
@@ -40,7 +40,7 @@
 		<!--  ================= ARM MASTER ================= /-->
 		<body name="upperarm" pos="0 0 0.6">
 			<geom class="0" type="cylinder" fromto="0 0 0 0 0 -0.345" size="0.045"/>
-			<joint class='arm' name="s_rotation" type="hinge" pos="0 0 0" axis="0 0 1" range="-0.698132 0.698132" user="003"/>
+			<joint class='arm' name="s_rotation" type="hinge" pos="0 0 0" axis="0 0 1" range="-0.785398 0.785398" user="003"/>
 
 			<!--  ================= ARM ================= /-->
 			<body name="forearm" pos="0.10 0 -0.390">
@@ -52,7 +52,7 @@
 					<!--  ================= UPPER GRIPPER ================= /-->
 					<body name="gripper1" pos="-0.075 0.0 -0.04">
 						<geom class="0" type="box" size="0.1 0.05 0.006"  rgba=".8 .3 .1 1"/>
-						<joint class='arm' name="gripper" type="slide" pos="0 0 0" axis="0 0 1" range="-0.001 0.0015" user="0035"/> 
+						<joint class='arm' name="gripper" type="slide" pos="0 0 0" axis="0 0 1" range="-0.2 0.003" user="0035"/> 
 					</body>
 					<!--  ================= LOWER GRIPPER ================= /-->
 					<body name="gripper2" pos="-0.075 0.0 -0.06">
@@ -101,7 +101,7 @@
 	<actuator>
 		
 		<!--  ================= O range de rotação é de mais ou menos 60° ================= / -->
-		<position joint='s_rotation' 	name='As_rotation' 	kp="30" ctrlrange='-0.698132 0.698132' forcelimited='true' forcerange='-25 25'/>
+		<position joint='s_rotation' 	name='As_rotation' 	kp="30" ctrlrange='-0.785398 0.785398' forcelimited='true' forcerange='-25 25'/>
 		<position joint='gripper' 	name='Gripper' 	kp="90" ctrlrange='-0.2 0.003'/> 				
 	</actuator>
 

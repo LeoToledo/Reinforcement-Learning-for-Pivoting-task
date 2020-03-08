@@ -257,7 +257,7 @@ def ppo(env_fn, actor_critic=core.mlp_actor_critic, ac_kwargs=dict(), seed=0,
     # Main loop: collect experience in env and update/log each epoch
     #######################################################################
     #Definindo variáveis
-    desired_angle_choices = [-20,-19,-18,-17,-16,-15,-14,-12,-11,-10,-9,-6,-5,5,6,9,10,11,12,14,15,16,17,18,19,20]
+    #desired_angle_choices = [-20,-19,-18,-17,-16,-15,-14,-12,-11,-10,-9,-6,-5,5,6,9,10,11,12,14,15,16,17,18,19,20]
     counter = 0
     acumulador = 0
     #######################################################################
@@ -266,32 +266,34 @@ def ppo(env_fn, actor_critic=core.mlp_actor_critic, ac_kwargs=dict(), seed=0,
     for epoch in range(epochs):
         ############################################################################
         #Escolhendo o ângulo desejado
-        desired_angle = np.random.choice(desired_angle_choices)
-        #desired_angle = np.random.randint(-20, 20)
+        #desired_angle = np.random.choice(desired_angle_choices)
+        desired_angle = np.random.randint(-20, 20)
         ############################################################################
 
         for t in range(local_steps_per_epoch):
             a, v_t, logp_t = sess.run(get_action_ops, feed_dict={x_ph: o.reshape(1,-1)})
+            
             o2, r, d, _ = env.step(a[0])
 
 #######################################################################################################################3
             #Checagem para não ficar muito tempo em um único ângulo
             if(acumulador > 6):
-                desired_angle = np.random.choice([-20,20,-15,15,-5,5])
-                #desired_angle = np.random.randint(-20,20)
+                #desired_angle = np.random.choice([-20,20,-15,15,-5,5])
+                desired_angle = np.random.randint(-20, 20)
+                
                 acumulador = 0
                 
             #Atualizando a reward
             #Caso complete o objetivo
-            if(o2[0] >= (desired_angle - np.abs(desired_angle/10 )) and o2[0] <= (desired_angle + np.abs(desired_angle/8 + 0.3)) ): 
-                r = (-1)*np.abs(o2[0] - desired_angle)/100
+            if(o2[0] >= (desired_angle - np.abs(desired_angle/8 - 0.3)) and o2[0] <= (desired_angle + np.abs(desired_angle/8 + 0.3)) ): 
+                r = (-1)*np.abs(o2[0] - desired_angle)/200
                 counter = counter + 1
                 d = 0
 
                 #Caso fique uma quantidade de tempo na região de sucesso
-                if(counter > 150):
+                if(counter > 120):
                     print("*********************Completou***********************")
-                    r = 1
+                    r = 10
                     counter = 0
                     d = 1
             #Se não completar
@@ -305,6 +307,7 @@ def ppo(env_fn, actor_critic=core.mlp_actor_critic, ac_kwargs=dict(), seed=0,
             
 #########################################
 #Atualizando o ângulo relativo para um erro entre ele e o desejado
+            ang_atual = o2[0]
             o2[0] = o2[0] - desired_angle
 #########################################
             # save and log
@@ -323,7 +326,7 @@ def ppo(env_fn, actor_critic=core.mlp_actor_critic, ac_kwargs=dict(), seed=0,
                 buf.finish_path(last_val)
                 if terminal:
                     #Guardando dados
-                    angles_store.append(o2[0] + desired_angle)
+                    angles_store.append(ang_atual)
                     reward_store.append(ep_ret)
                     if(ep_len != max_ep_len):
                         steps_store.append(ep_len)
@@ -333,7 +336,7 @@ def ppo(env_fn, actor_critic=core.mlp_actor_critic, ac_kwargs=dict(), seed=0,
                         acumulador += 1
 
                     #Printando resultados
-                    print(" || Reward: ", np.round(ep_ret, 0), " || Steps: ", ep_len, " || Angulo: ", np.round((o2[0] + desired_angle), 1), " || Target: ", desired_angle)
+                    print(" || Reward: ", np.round(ep_ret, 0), " || Steps: ", ep_len, " || Angulo: ", np.round((ang_atual), 1), " || Target: ", desired_angle)
                     # only save EpRet / EpLen if trajectory finished
                     logger.store(EpRet=ep_ret, EpLen=ep_len)
                 o, ep_ret, ep_len = env.reset(), 0, 0
