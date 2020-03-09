@@ -21,11 +21,11 @@
 		<position ctrllimited="true"/>
 		
 		<default class='0'>
-			<geom friction="0.55 0.002 0.001" rgba=".8 .3 .1 1" contype="1" conaffinity="0" condim="4"/>
+			<geom friction="0.75 0.004 0.001" rgba=".8 .3 .1 1" contype="1" conaffinity="0" condim="4"/>
 		</default>
 
 		<default class='1'>
-			<geom friction="0.6 0.002 0.001" rgba=".8 .4 .1 1" contype="1" conaffinity="0" condim="4"/>
+			<geom friction="0.85 0.0045 0.001" rgba=".8 .4 .1 1" contype="1" conaffinity="0" condim="4"/>
 		</default>
 		
 		<default class='arm'>

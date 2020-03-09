@@ -53,15 +53,21 @@ class InvertedPendulumEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         vel_rel = self.sim.data.get_joint_qvel("fr")
         #print(vel_rel)
 
+        #Observação para verificar se a ferramenta caiu
+        if(obs[4] < -0.1):
+            caiu = 1
+        else:
+            caiu = 0
+
         #A única observação que o ambiente deve dar é o ângulo relativo entre a ferramenta e o gripper
-        obs_final = np.concatenate([ [relative_angle] , [obs[1]], [vel_gripper], [vel_rel[5]-vel_gripper]]).ravel()
+        obs_final = np.concatenate([ [relative_angle], [obs[1]], [vel_gripper], [vel_rel[5]-vel_gripper], [caiu] ]).ravel()
         
         return obs_final
 
     def viewer_setup(self):
         v = self.viewer
         v.cam.trackbodyid = 0
-        v.cam.distance = self.model.stat.extent + 0.6
+        v.cam.distance = self.model.stat.extent + 0.7
     
    
         

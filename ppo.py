@@ -267,7 +267,9 @@ def ppo(env_fn, actor_critic=core.mlp_actor_critic, ac_kwargs=dict(), seed=0,
         ############################################################################
         #Escolhendo o ângulo desejado
         #desired_angle = np.random.choice(desired_angle_choices)
-        desired_angle = np.random.randint(-20, 20)
+        desired_angle = np.random.randint(-30, 30)
+        while(desired_angle == 0):
+            desired_angle = np.random.randint(-30, 30)
         ############################################################################
 
         for t in range(local_steps_per_epoch):
@@ -277,15 +279,16 @@ def ppo(env_fn, actor_critic=core.mlp_actor_critic, ac_kwargs=dict(), seed=0,
 
 #######################################################################################################################3
             #Checagem para não ficar muito tempo em um único ângulo
-            if(acumulador > 6):
+            if(acumulador > 4):
                 #desired_angle = np.random.choice([-20,20,-15,15,-5,5])
-                desired_angle = np.random.randint(-20, 20)
-                
+                desired_angle = np.random.randint(-30, 30)
+                while(desired_angle == 0):
+                    desired_angle = np.random.randint(-30, 30)
                 acumulador = 0
                 
             #Atualizando a reward
             #Caso complete o objetivo
-            if(o2[0] >= (desired_angle - np.abs(desired_angle/8 - 0.3)) and o2[0] <= (desired_angle + np.abs(desired_angle/8 + 0.3)) ): 
+            if(o2[0] >= (desired_angle - np.abs(desired_angle/7)) and o2[0] <= (desired_angle + np.abs(desired_angle/7)) ): 
                 r = (-1)*np.abs(o2[0] - desired_angle)/200
                 counter = counter + 1
                 d = 0
@@ -301,6 +304,13 @@ def ppo(env_fn, actor_critic=core.mlp_actor_critic, ac_kwargs=dict(), seed=0,
                 counter = 0
                 r = (-1)*np.abs(o2[0] - desired_angle)/100
                 d = 0
+            
+            #Verificando se a ferramenta caiu
+            if(o2[4] == 1):
+                r_caiu = -2
+            else:
+                r_caiu = 0
+            r = r + r_caiu
 #######################################################################################################################3
             ep_ret += r
             ep_len += 1
@@ -373,26 +383,6 @@ def ppo(env_fn, actor_critic=core.mlp_actor_critic, ac_kwargs=dict(), seed=0,
         plt.savefig("/home/kodex/rl/spinningup/data/Rewards")
         plt.close()
 
-        #Fazendo uma média das rewards
-        N = 40
-        csum, moving_av = [0], []
-
-        for i, x in enumerate(steps_store, 1):
-            csum.append(csum[i-1] + x)
-            if i>=N:
-                moving_ave = (csum[i] - csum[i-N])/N
-                #can do stuff with moving_ave here
-                moving_av.append(moving_ave)
-
-        #Steps
-        plt.figure(num=None, figsize=(20, 12), dpi=120, facecolor='w', edgecolor='k')
-        plt.plot(steps_store, color='g')
-        plt.ylabel("Steps")
-        plt.title('Mean Number of Steps Before Reaching Goal')
-        plt.grid(True, linestyle='-', which='major', color='lightgrey',alpha=0.5)
-        plt.xlabel("Episode")
-        plt.savefig("/home/kodex/rl/spinningup/data/Steps")
-        plt.close()
         ##########################################################################################################
         
         # Save model
