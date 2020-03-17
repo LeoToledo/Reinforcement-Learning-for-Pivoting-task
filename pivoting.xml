@@ -71,20 +71,20 @@
 		</body>
 
 
-		
-		<!--  ================= OBJECT ================= 1 / 
-		<body name="object" pos="0.415 0 0.205">
-			<geom class="0" type="box" size="0.24 .12 .006" rgba="0.1 0.1 0.0 1" contype="1" conaffinity="1"/>
-			<joint name="fr" type="free" limited='false' damping="0" armature="0" user="010"/>	
 
-		</body>  -->
-
-		<!--  ================= OBJECT ================= 2 / -->
+		<!--  ================= MAIN OBJECT ================= 2 / -->
 		<body name="object" pos="0.55 0 0.205">
 			<geom class="1" type="box" size="0.215 .12 .004" rgba="0.1 0.1 0.0 1" conaffinity="1"/>
 			<joint name="fr" type="free" limited='false' damping="0" armature="0" user="010"/>	
 
-		</body>
+		</body>  
+
+		<!--  ================= Alternative OBJECT ================= 2 / 
+		<body name="object" pos="0.55 0 0.205">
+			<geom class="1" type="box" size="0.18 .22 .004" rgba="0.1 0.1 0.0 1" conaffinity="1"/>
+			<joint name="fr" type="free" limited='false' damping="0" armature="0" user="010"/>	
+
+		</body> -->
 
 		<!--  ================= REFERENCE OBJECT ================= /-->
 		<body name="ref_object" pos="0.35 -0.168 0.01">

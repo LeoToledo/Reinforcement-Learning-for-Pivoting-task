@@ -119,32 +119,38 @@ def run_policy(env, get_action, max_ep_len=None, num_episodes=100, render=True):
     o, r, d, ep_ret, ep_len, n = env.reset(), 0, False, 0, 0, 0
 
     #############################
-    desired_angle = 20
+    desired_angle = -30
     counter = 0
     angulo_store = []
-    master_angle_store = []
+    master_angle_store_mean = []
+    master_angle_store_max = []
+    master_angle_store_min = []
+    end_of_batch = 0
     #############################
 
     while n < num_episodes:
-        if render:
-            env.render()
-            time.sleep(1e-10)
+        #if render:
+            #env.render()
+            #time.sleep(1e-10)
 
         a = get_action(o)
         o, r, d, _ = env.step(a)
-        
 #######################################################################################################################3
         #Atualizando a reward
         #Caso complete o objetivo
-        if(o[0] >= (desired_angle - np.abs(desired_angle/8 + 0.2)) and o[0] <= (desired_angle + np.abs(desired_angle/8 + 0.2))): 
-            r = (-1)*np.abs(o[0] - desired_angle)/100
+        erro = min(np.abs(desired_angle/7), 3)
+        if( (desired_angle) <= 6 or (desired_angle) >= -6):
+            erro = erro + 0.3
+
+        if(o[0] >= (desired_angle - erro) and o[0] <= (desired_angle + erro)): 
+            r = (-1)*np.abs(o[0] - desired_angle)/200
             counter = counter + 1
             d = 0
 
             #Caso fique uma quantidade de tempo na região de sucesso
-            if(counter > 100):
+            if(counter > 120):
                 print("*********************Completou***********************")
-                r = 1
+                r = 10
                 counter = 0
                 d = 1
         #Se não completar
@@ -152,8 +158,9 @@ def run_policy(env, get_action, max_ep_len=None, num_episodes=100, render=True):
             counter = 0
             r = (-1)*np.abs(o[0] - desired_angle)/100
             d = 0
-
+        
         #Atualizando o ângulo relativo para um erro entre ele e o desejado
+        ang_atual = o[0]
         o[0] = o[0] - desired_angle
 #######################################################################################################################3
         ep_ret += r
@@ -161,63 +168,46 @@ def run_policy(env, get_action, max_ep_len=None, num_episodes=100, render=True):
 
         if d or (ep_len == max_ep_len):
             #Guardando o ângulo
-            angulo_store.append(o[0]+desired_angle)
+            angulo_store.append(np.abs(desired_angle - ang_atual))
 
             logger.store(EpRet=ep_ret, EpLen=ep_len)
-            print('Episodio %d \t Reward %.3f \t EpLen %d \t Angulo %.1f \t Target %.1f'%(n, ep_ret, ep_len, (o[0] + desired_angle), desired_angle))
+            print('Episodio %d \t Reward %.3f \t EpLen %d \t Angulo %.1f \t Target %.1f'%(n, ep_ret, ep_len, (ang_atual), desired_angle))
             o, r, d, ep_ret, ep_len = env.reset(), 0, False, 0, 0
             n += 1
-            if(n == 100):
-                angulo0_store = angulo_store
+            
+            #Atualizando o ângulo desejado
+            end_of_batch = end_of_batch + 1
+            #Após ficar 30 vezes no mesmo ângulo, troca de angulo e salva a media do atual para plota-lo
+            if(end_of_batch == 30):
+                end_of_batch = 0
+                #Fazendo a média dos 30 angulos utilizados
+                master_angle_store_mean.append(np.mean(angulo_store))
+                master_angle_store_max.append(np.max(angulo_store))
+                master_angle_store_min.append(np.min(angulo_store))
                 angulo_store = []
-                desired_angle = 10
-            elif(n == 200):
-                angulo1_store = angulo_store
-                angulo_store = []
-                desired_angle = 15
-            elif(n == 300):
-                angulo2_store = angulo_store
-                angulo_store = []
-                desired_angle = 20
-            elif(n == 400):
-                angulo3_store = angulo_store
-                angulo_store = []
-                
-     
+
+                if(desired_angle <= 30):
+                    desired_angle = desired_angle + 1
+                    if(desired_angle == 0):
+                        desired_angle = desired_angle + 1
+                else:
+                    break
+
+    #np.savetxt("master_angle_store.txt", master_angle_store, fmt="%s")          
+    print("Mean: ", master_angle_store_mean)
+    #print("Min: ", master_angle_store_min)
+    #print("Max: ", master_angle_store_max)
     logger.log_tabular('EpRet', with_min_and_max=True)
     logger.log_tabular('EpLen', average_only=True)
     logger.dump_tabular()
-########################################################
-    #Plotando steps antes do sucesso
-    #Ângulos
-    plt.figure(num=None, figsize=(20, 12), dpi=120, facecolor='w', edgecolor='k')
-    angulo_store = [
-        angulo0_store, 
-        angulo1_store,
-        angulo2_store,
-        angulo3_store,
-    ]
-    
-    plt.title('BoxPlot of Reached Angles With 100 Steps')
-    plt.yticks(np.arange(4, 21, step=1))
-    plt.ylim(4, 21)
-    #labels = ['-20', '-15', '-10', '-5']
-    labels = ['5','10','15','20']
 
-    plt.boxplot(angulo_store, labels=labels, showfliers=False)
-    plt.grid(True, linestyle='-', which='major', color='lightgrey',alpha=0.5)
-    plt.ylabel("Reached Angle")
-    plt.xlabel("Desired Angle")
-    plt.savefig("/home/kodex/rl/spinningup/data/AngulosBox")
-    plt.close()
-########################################################
 
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('fpath', type=str)
     parser.add_argument('--len', '-l', type=int, default=0)
-    parser.add_argument('--episodes', '-n', type=int, default=400)
+    parser.add_argument('--episodes', '-n', type=int, default=1800)
     parser.add_argument('--norender', '-nr', action='store_true')
     parser.add_argument('--itr', '-i', type=int, default=-1)
     parser.add_argument('--deterministic', '-d', action='store_true')
@@ -225,4 +215,4 @@ if __name__ == '__main__':
     env, get_action = load_policy_and_env(args.fpath, 
                                           args.itr if args.itr >=0 else 'last',
                                           args.deterministic)
-    run_policy(env, get_action, 2000, args.episodes, not(args.norender))
+    run_policy(env, get_action, 4000, args.episodes, not(args.norender))

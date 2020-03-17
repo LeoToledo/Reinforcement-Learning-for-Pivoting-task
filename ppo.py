@@ -279,7 +279,7 @@ def ppo(env_fn, actor_critic=core.mlp_actor_critic, ac_kwargs=dict(), seed=0,
 
 #######################################################################################################################3
             #Checagem para não ficar muito tempo em um único ângulo
-            if(acumulador > 4):
+            if(acumulador > 3):
                 #desired_angle = np.random.choice([-20,20,-15,15,-5,5])
                 desired_angle = np.random.randint(-30, 30)
                 while(desired_angle == 0):
@@ -288,7 +288,11 @@ def ppo(env_fn, actor_critic=core.mlp_actor_critic, ac_kwargs=dict(), seed=0,
                 
             #Atualizando a reward
             #Caso complete o objetivo
-            if(o2[0] >= (desired_angle - np.abs(desired_angle/7)) and o2[0] <= (desired_angle + np.abs(desired_angle/7)) ): 
+            erro = min(np.abs(desired_angle/7), 3)
+            if( (desired_angle) <= 6 or (desired_angle) >= -6):
+                erro = erro + 0.3
+
+            if(o2[0] >= (desired_angle - erro ) and o2[0] <= (desired_angle + erro) ): 
                 r = (-1)*np.abs(o2[0] - desired_angle)/200
                 counter = counter + 1
                 d = 0
@@ -306,11 +310,11 @@ def ppo(env_fn, actor_critic=core.mlp_actor_critic, ac_kwargs=dict(), seed=0,
                 d = 0
             
             #Verificando se a ferramenta caiu
-            if(o2[4] == 1):
-                r_caiu = -2
-            else:
-                r_caiu = 0
-            r = r + r_caiu
+            #if(o2[4] == 1):
+                #r_caiu = -1
+            #else:
+                #r_caiu = 0
+            #r = r + r_caiu
 #######################################################################################################################3
             ep_ret += r
             ep_len += 1
@@ -342,7 +346,7 @@ def ppo(env_fn, actor_critic=core.mlp_actor_critic, ac_kwargs=dict(), seed=0,
                         steps_store.append(ep_len)
 
                     #Checagem para não ficar muito tempo em um só ângulo
-                    if(ep_len < 1000):
+                    if(ep_len < 2000):
                         acumulador += 1
 
                     #Printando resultados
@@ -374,12 +378,15 @@ def ppo(env_fn, actor_critic=core.mlp_actor_critic, ac_kwargs=dict(), seed=0,
                 moving_aves.append(moving_ave)
 
         #Reward
-        plt.figure(num=None, figsize=(20, 12), dpi=120, facecolor='w', edgecolor='k')
-        plt.plot(moving_aves, color='r')
-        plt.ylabel("Reward")
-        plt.xlabel("Episode")
-        plt.grid(True, linestyle='-', which='major', color='lightgrey',alpha=0.5)
-        plt.title('Mean Reward Per Episode')
+        #plt.figure(num=None, figsize=(20, 12), dpi=120, facecolor='w', edgecolor='k')
+        plt.xticks(np.arange(0,2001, step=500),fontsize=20)
+        plt.yticks(fontsize=20)
+        plt.plot(moving_aves, color='r',label="Torque-Controlled",linewidth=2)
+        plt.legend(loc="lower right", fontsize=16)
+        plt.ylabel("Reward",fontsize=12)
+        plt.xlabel("Episode",fontsize=12)
+        plt.grid(True, linestyle='-', which='major', color='lightgrey',alpha=0.7)
+        plt.title('Mean Reward Per Episode',fontsize=16)
         plt.savefig("/home/kodex/rl/spinningup/data/Rewards")
         plt.close()
 

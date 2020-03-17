@@ -8,7 +8,7 @@ class InvertedPendulumEnv(mujoco_env.MujocoEnv, utils.EzPickle):
 
     def __init__(self):
         utils.EzPickle.__init__(self)
-        mujoco_env.MujocoEnv.__init__(self, 'pivoting.xml', 2)
+        mujoco_env.MujocoEnv.__init__(self, 'pivotingrika.xml', 2)
     
     def step(self, a):
         self.do_simulation(a, self.frame_skip)
@@ -54,7 +54,9 @@ class InvertedPendulumEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         #print(vel_rel)
 
         #Observação para verificar se a ferramenta caiu
-        if(obs[4] < -0.1):
+        #0.07 motor
+        #-0.1 position
+        if(obs[4] < 0.07):
             caiu = 1
         else:
             caiu = 0
