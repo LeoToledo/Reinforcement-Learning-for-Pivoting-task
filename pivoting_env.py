@@ -1,21 +1,23 @@
 import numpy as np
 from gym import utils
-from gym.envs.mujoco import mujoco_env
+from gym.envs.my_envs import mujoco_env
 import matplotlib.pyplot as plt
-import sys
+import math
 
-class InvertedPendulumEnv(mujoco_env.MujocoEnv, utils.EzPickle):
 
+class PivotingEnv(mujoco_env.MujocoEnv, utils.EzPickle):
+    
     def __init__(self):
+        self.ep = 0
         utils.EzPickle.__init__(self)
-        mujoco_env.MujocoEnv.__init__(self, 'pivotingrika.xml', 2)
+        mujoco_env.MujocoEnv.__init__(self, 'old_pivoting.xml', 2)
+        
     
     def step(self, a):
         self.do_simulation(a, self.frame_skip)
         
-        ob = self._get_obs()    
-     
-        
+        ob = self._get_obs()       
+        print("AQUI: ", self.ep)
         reward = 0
         done = 0
         return ob, reward, done, {}
@@ -25,11 +27,39 @@ class InvertedPendulumEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         qpos = self.init_qpos
         qvel = self.init_qvel
         
-       
+        self.ep += 1
+        
         self.set_state(qpos, qvel)
         return self._get_obs()
 
+
     def _get_obs(self):
+        '''
+        #Pegando o Angulo da ferramenta em radianos
+        obs = self.sim.data.get_joint_qpos("tool")
+        tools_angle = np.arctan2(2*(obs[3]*obs[6] + obs[4]*obs[5]), (1 - 2*(obs[5]**2 + obs[6]**2)))      
+        
+        #Gripper's angle
+        grippers_angle = self.sim.data.get_joint_qpos("kuka_joint_6")
+        #Angle between tool and gripper
+        relative_angle = tools_angle - grippers_angle  
+        #Gripper's Distance
+        grippers_dist = obs[1]
+        #Gripper's velocity
+        grippers_vel = self.sim.data.get_joint_qvel("kuka_joint_6")
+        #Tool's velocity relative to gripper
+        tools_vel = self.sim.data.get_joint_qvel("tool")
+        tools_vel = tools_vel[5] #Tool's global velocity
+        tools_vel = tools_vel - grippers_vel
+       
+        if(obs[2] < 1.1):
+            drop = 1
+        else:
+            drop = 0
+        obs = np.concatenate([ [relative_angle], [grippers_dist], [grippers_vel], [tools_vel], [drop] ]).ravel()
+        
+        return obs
+'''
         #Pega o qpos do mujoco e guarda em obs
         obs = np.concatenate([self.sim.data.qpos, [0]]).ravel()
         
@@ -42,7 +72,7 @@ class InvertedPendulumEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         
         #Convertendo o Angulo do Gripper para Graus
         obs[0] = 180*obs[0]/np.pi
-
+    
         #Aqui, calculamos o ângulo relativo em graus
         relative_angle = obs[5] - obs[0]
         
@@ -52,7 +82,7 @@ class InvertedPendulumEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         #Aqui,vamos pegar a velocidade da ferramenta em relação ao gripper
         vel_rel = self.sim.data.get_joint_qvel("fr")
         #print(vel_rel)
-
+    
         #Observação para verificar se a ferramenta caiu
         #0.07 motor
         #-0.1 position
@@ -60,37 +90,16 @@ class InvertedPendulumEnv(mujoco_env.MujocoEnv, utils.EzPickle):
             caiu = 1
         else:
             caiu = 0
-
+    
         #A única observação que o ambiente deve dar é o ângulo relativo entre a ferramenta e o gripper
         obs_final = np.concatenate([ [relative_angle], [obs[1]], [vel_gripper], [vel_rel[5]-vel_gripper], [caiu] ]).ravel()
+  
         
         return obs_final
-
+    
     def viewer_setup(self):
         v = self.viewer
         v.cam.trackbodyid = 0
         v.cam.distance = self.model.stat.extent + 0.7
     
-   
-        
 
-
-###########################
-#obs[0] - Hinge - Angulo em radianos do braço
-#obs[1] - Gripper
-#obs[2] - X da ferramenta
-#obs[3] - Y da ferramenta
-#obs[4] - Z da ferramenta
-#obs[5] - Angulo da ferramenta em graus
-#obs[6] - Quaternion
-#obs[7] - Quaternion
-#obs[8] - Quaternion
-###########################
-#Para achar o ângulo da ferramenta relativamente ao braço, faça obs[5]-obs[0]
-#Para saber se a ferramenta caiu, verificar de obs[4] > 0.07 (Não caiu)
-
-
-##############################
-#obs_final[0] - Angulo relativo
-#obs_final[1] - Posição do gripper
-#obs_final[2] - Velocidade do gripper
