@@ -33,7 +33,7 @@ if __name__ == '__main__':
     ctrl = CtrlUtils(sim, simulation_time=simulation_time, use_gravity=use_gravity,
                      plot_2d=plot_2d, use_kd=use_kd, use_ki=use_ki)
 
-    ctrl.controller_type = CtrlType.INDEP_JOINTS
+    # ctrl.controller_type = CtrlType.INDEP_JOINTS
     print(ctrl.name_tcp)
     print(ctrl.name_ft_sensor)
     # Inverse dynamics in joint space
