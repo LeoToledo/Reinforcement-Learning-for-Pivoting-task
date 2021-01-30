@@ -96,7 +96,7 @@ class CtrlUtils:
         self.error_q_int_ant = error_q_int
         return self.Kp.dot(self.error_q) + self.Kd.dot(self.error_qvel) + self.Ki.dot(error_q_int)
 
-    def ctrl_inverse_dynamics_operational_space(self, sim, k, xacc_ref, alpha_ref):
+    def ctrl_inverse_dynamics_operational_space(self, sim, xacc_ref, alpha_ref):
         H = self.get_inertia_matrix(sim)
         H_inv = np.linalg.inv(H)
         C = self.get_coriolis_vector(sim)
@@ -206,7 +206,7 @@ class CtrlUtils:
             self.error_q_int_ant = np.zeros(7)
             self.error_q_ant = np.zeros(7)
 
-    def ctrl_action(self, sim, k, qacc_ref=0, xacc_ref=0, alpha_ref=0):
+    def ctrl_action(self, sim, qacc_ref=np.zeros(7), xacc_ref=np.zeros(3), alpha_ref=np.zeros(3)):
         if self.controller_type == CtrlType.INDEP_JOINTS:
             if self.Kp is None:
                 self.get_pd_matrices()
@@ -222,11 +222,11 @@ class CtrlUtils:
         if self.controller_type == CtrlType.INV_DYNAMICS_OP_SPACE:
             if self.Kp is None:
                 self.get_pd_matrices()
-            u = self.ctrl_inverse_dynamics_operational_space(sim, k, xacc_ref=xacc_ref, alpha_ref=alpha_ref)
+            u = self.ctrl_inverse_dynamics_operational_space(sim, xacc_ref=xacc_ref, alpha_ref=alpha_ref)
 
         return u
 
-    def calculate_errors(self, sim, k,  qpos_ref=0, qvel_ref=0, kin=0):
+    def calculate_errors(self, sim,  qpos_ref=0, qvel_ref=0, kin=0):
         if self.controller_type == CtrlType.INV_DYNAMICS_OP_SPACE:
             x_ref, xvel_ref, xacc_ref, quat_ref, w_ref, alpha_ref = kin
             J = self.get_jacobian_site(sim)
@@ -400,7 +400,7 @@ class CtrlUtils:
     #     q_next = q_act + J_inv.dot(v_tcp)*sim.model.opt.timestep
     #     return q_next
 
-    def move_to_joint_pos(self, sim, xd=None, xdmat=None, qd=None, viewer=None, eps=1.5*np.pi/180):
+    def move_to_joint_pos(self, sim, xd=None, xdmat=None, qd=None, viewer=None, eps=1.5*np.pi/180, do_step=True):
         if qd is not None:
             self.qd = qd
         if xd is not None:
@@ -416,23 +416,23 @@ class CtrlUtils:
             # qpos_ref, qvel_ref, qacc_ref = self.iiwa_kin.traj_joint_get_point()
             self.calculate_errors(sim, k, qpos_ref=qpos_ref, qvel_ref=qvel_ref)
 
-            if (np.absolute(self.qd - self.get_robot_qpos(sim)) < eps).all():
-                return
+            # if (np.absolute(self.qd - self.get_robot_qpos(sim)) < eps).all():
+            #     return
 
             u = self.ctrl_action(sim, k, qacc_ref=qacc_ref)
-            sim.data.ctrl[:self.nv] = u
-            sim.data.ctrl[-1] = 0.5
-            self.step(sim, k)
+            yield u
+            if do_step:
+                self.step(sim, k)
             if viewer is not None:
                 if qd is not None:
                     xd, xdmat = self.iiwa_kin.fk_iiwa(qd)
                     xd += sim.data.get_body_xpos('kuka_base')
                 self.render_frame(viewer, xd, xdmat)
                 viewer.render()
-            k += 1
+            # k += 1
             # TODO: create other stopping criteria
-            if k >= self.n_timesteps:  # and os.getenv('TESTING') is not None:
-                return
+            # if k >= self.n_timesteps:  # and os.getenv('TESTING') is not None:
+            #     return
 
     def move_to_point(self, xd, xdmat, sim, viewer=None):
         self.xd = xd

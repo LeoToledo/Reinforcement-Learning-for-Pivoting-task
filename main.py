@@ -1,6 +1,7 @@
 import gym
 import tensorflow as tf
 from spinup import ppo_tf1 as ppo
+import pivoting_env
 
 env_fn = lambda: gym.make('pivoting_env:pivoting-v0')
 
