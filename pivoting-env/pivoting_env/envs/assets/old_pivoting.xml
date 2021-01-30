@@ -1,0 +1,108 @@
+<mujoco model="arm_claw (v1.31)">
+	<compiler 	inertiafromgeom="true"
+				angle="radian"/>
+			
+	<size 	nuser_jnt="1"
+			nuser_geom="1"/>
+
+	<option	timestep="0.002"
+			gravity="0 0 -9.81"
+			viscosity="0.00002"
+			iterations="20"/>
+	
+	<asset>
+		<material name="MatGnd" specular=".3" shininess=".0" reflectance="0.0" rgba=".1 .7 .1 1"/>
+	</asset>
+	
+	<default>
+		<joint limited="true" damping="1" stiffness="0" armature=".1" user="0"/>
+		<geom solref="0.008 1" solimp="0.95 0.95 0.01" margin="0.001" user="0"/>
+		<motor ctrllimited="true" ctrlrange="-1 1"/>
+		<position ctrllimited="true"/>
+		
+		<default class='0'>
+			<geom friction="0.75 0.004 0.001" rgba=".8 .3 .1 1" contype="1" conaffinity="0" condim="4"/>
+		</default>
+
+		<default class='1'>
+			<geom friction="0.85 0.0045 0.001" rgba=".8 .4 .1 1" contype="1" conaffinity="0" condim="4"/>
+		</default>
+		
+		<default class='arm'>
+			<joint damping="5"/>
+		</default>
+	</default>
+
+	<worldbody>
+		<light directional="true" cutoff="40" exponent="10" diffuse=".4 .4 .4" specular=".5 .5 .5" pos="0 0 1.5" dir="0 0 -1"/>
+		<geom name="tableTop" material="MatGnd" type="plane" pos="0.15 0 0" size="1.9 2.9 1.2" rgba="0.8 0.8 0.8 1" contype="1" conaffinity="1"/>
+	                                                                
+		<!--  ================= ARM MASTER ================= /-->
+		<body name="upperarm" pos="0 0 0.6">
+			<geom class="0" type="cylinder" fromto="0 0 0 0 0 -0.345" size="0.05"/>
+			<joint class='arm' name="s_rotation" type="hinge" pos="0 0 0" axis="0 0 1" range="-0.785398 0.785398" user="003"/>
+
+			<!--  ================= ARM ================= /-->
+			<body name="forearm" pos="0.10 0 -0.390">
+				<geom class="0" type="box"  size="0.15 .09 .05"/>
+				
+				<!--  ================= Gripper Master ================= /-->
+				<body name="gripperMaster" pos="0.325 0 0.045">
+					
+					<!--  ================= UPPER GRIPPER ================= /-->
+					<body name="gripper1" pos="-0.075 0.0 -0.04">
+						<geom class="0" type="box" size="0.1 0.05 0.006"  rgba=".8 .3 .1 1"/>
+						<joint class='arm' name="gripper" type="slide" pos="0 0 0" axis="0 0 1" range="-0.2 0.003" user="0035"/> 
+					</body>
+					<!--  ================= LOWER GRIPPER ================= /-->
+					<body name="gripper2" pos="-0.075 0.0 -0.06">
+						<geom class="0" type="box" size="0.1 0.05 0.006" rgba=".8 .3 .1 1" contype="5"/>
+					</body>
+
+						<!--  ================= REFERENCE OBJECT ================= /
+						<body name="ref_object" pos="0.13 0.098 -0.02">
+							<geom class="1" type="box" size="0.25 .14 .01" rgba="0.6 0.2 0.5 0.1" conaffinity="0" contype="0" mass="0" euler="0 0 0.209"/>
+						</body> -->
+
+				</body>
+
+			</body>
+			
+		</body>
+
+
+
+		<!--  ================= MAIN OBJECT ================= 2 / --> 
+		<body name="object" pos="0.55 0 0.205">
+			<geom class="1" type="box" size="0.215 .12 .004" rgba="0.1 0.1 0.0 1" conaffinity="1"/>
+			<joint name="fr" type="free" limited='false' damping="0" armature="0" user="010"/>	
+
+		</body> 
+
+		<!--  ================= Alternative OBJECT ================= 2 / 
+		<body name="object" pos="0.55 0 0.205">
+			<geom class="1" type="box" size="0.12 .1 .004" rgba="0.1 0.1 0.0 1" conaffinity="1"/>
+			<joint name="fr" type="free" limited='false' damping="0" armature="0" user="010"/>	
+
+		</body>  -->
+
+		<!--  ================= REFERENCE OBJECT GROUND ================= /-->
+		<body name="ref_object" pos="0.35 -0.168 0.01">
+			<geom class="1" type="plane" size="0.55 .17 .01" rgba="0.9 0.05 0.15 0.2" conaffinity="0" contype="0" mass="0" />
+
+			<body name="ref2_object" pos="0 0.35 0.01">
+				<geom class="1" type="plane" size="0.55 .17 .01" rgba="0.2 0.8 0.2 0.2" conaffinity="0" contype="0" mass="0" />
+			</body> 
+		</body>  
+		
+	
+	</worldbody>
+	
+	<actuator>
+		
+		<!--  ================= O range de rotação é de mais ou menos 60° ================= / -->
+		<position joint='s_rotation' 	name='As_rotation' 	kp="30" ctrlrange='-0.785398 0.785398' forcelimited='true' forcerange='-25 25'/>
+		<position joint='gripper' 	name='Gripper' 	kp="90" ctrlrange='-0.2 0.003'/> 				
+	</actuator>
+
+</mujoco>
