@@ -1,9 +1,10 @@
 import numpy as np
 from gym import utils
-from gym.envs.mujoco import mujoco_env
+from pivoting_env.envs import mujoco_env
 import matplotlib.pyplot as plt
 import math
-from controllers_utils import CtrlUtils
+#from controllers_utils import CtrlUtils
+from pivoting_env.envs.controllers_utils import CtrlUtils
 
 MAX_EP_LEN = 1000
 N_JOINTS = 7
