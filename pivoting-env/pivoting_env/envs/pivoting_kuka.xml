@@ -1,0 +1,96 @@
+<?xml version="1.0" ?>
+
+<mujoco>
+  <compiler angle="radian" coordinate="local" meshdir="meshes/"/>
+
+  <option>
+    <flag gravity="enable"/>
+  </option>
+
+  <default>
+    <joint damping="0.5"/>
+    <default class="visual">
+      <geom contype="0" conaffinity="0"/>
+    </default>
+    <default class="collision">
+      <geom contype="1" conaffinity="1" friction=".6 0.005 0.0001"/>
+    </default>
+    <site rgba="1 0 0 .5"/>
+  </default>
+
+  <asset>
+    <include file="kuka/kuka_assets.xml"/>
+    <texture type="skybox" builtin="gradient" rgb1="1 1 1" rgb2=".6 .8 1" width="256" height="256"/>
+  </asset>
+
+  <worldbody>
+
+    <light pos="0 0 1000" castshadow="false"/>
+
+    <geom class="collision" type="plane" size="10 10 1" rgba=".8 .8 .8 1"/>
+
+    <!--Mesa -->
+    <body name="kuka_table" pos="0 0 1" euler="0 0 1.570796326794897">
+      <geom class="collision" type="box" size="1.9 1.9 .5" pos=".0 -0.7 -.5" rgba=".5 .5 .5 1"/>
+
+      <!--Kuka -->
+      <body name="kuka_base" pos="0 0.55 0" euler="0 0 -1.570796326794897">
+        <include file="kuka/kuka_mesh_collision_peg_ee.xml"/>
+      </body>
+
+      <!--Linhas de Referência -->
+      <body name="ref_line" pos="0 0 0.001" euler="0 0 0">
+          <!-- 0 graus -->
+	  <body name="ref_0" pos="0 -1.3 0">
+		<geom  type="plane" size="0.02 1.3 .01" rgba="0.2 0.8 0.2 0.2" conaffinity="0" contype="0" mass="0" />
+	  </body>
+          <!-- 30(+-) graus -->
+	  <body name="ref_+30" pos="0.7 -1.3 0">
+		<geom  type="plane" euler="0 0 0.523599" size="0.02 1.49 .01" rgba="0.6 0.8 0.3 0.2" conaffinity="0" contype="0" mass="0" />
+	  </body>
+	  <body name="ref_-30" pos="-0.7 -1.3 0">
+		<geom  type="plane" euler="0 0 -0.523599" size="0.02 1.49 .01" rgba="0.6 0.8 0.3 0.2" conaffinity="0" contype="0" mass="0" />
+	  </body>
+          <!-- 45(+-) graus -->
+	  <body name="ref_+45" pos="0.95 -1.02 0">
+		<geom  type="plane" euler="0 0 0.785398" size="0.02 1.32 .01" rgba="0.7 0.6 0.5 0.2" conaffinity="0" contype="0" mass="0" />
+	  </body>
+	  <body name="ref_-45" pos="-0.95 -1.02 0">
+		<geom  type="plane" euler="0 0 -0.785398" size="0.02 1.32 .01" rgba="0.7 0.6 0.5 0.2" conaffinity="0" contype="0" mass="0" />
+	  </body>
+          <!-- 90 graus -->
+	  <body name="ref_90" pos="0 -0.04 0">
+		<geom  type="plane" euler="0 0 1.5708" size="0.03 1.9 .01" rgba="0.4 0.8 0.4 0.9" conaffinity="0" contype="0" mass="0" />
+	  </body>
+
+      </body>
+
+    </body>
+
+    <!--Peças
+    <body name="tool_1" pos="0 0.55 1" >
+      <geom class="collision" type="box" size="0.1 0.225 .005" pos="0 -1.12 .56" rgba=".3 .7 .5 1"/>
+      <joint name="tool" type="free" limited='false' damping="0" armature="0"/> -->
+
+     <!-- <body name="tool_1" pos="0.1 0 1.785" euler="0 0 0"> esse cara é a posicao que eu quero do corpo no fim-->
+    <body name="tool_1" pos="0.1 0 1.785" euler="0 0 0">
+        <geom class="collision" type="box" size="0.1225 0.0575 .0035" pos="0.225 0 0" rgba=".3 .7 .5 1"/>
+        <joint name="tool" type="free" limited='false' damping="0" armature="0"/> -->
+
+      <!--Linha de Referência -->
+      <body name="ref_obj" pos="2.3 0 0.01">
+		<geom  type="box" size="0.03 0.03 .01" rgba="1 0.2 0.2 0.4" conaffinity="0" contype="0" mass="0" />
+      </body>
+
+    </body>
+
+  </worldbody>
+
+  <actuator>
+    <include file="kuka/kuka_actuators.xml"/>
+  </actuator>
+
+  <sensor>
+    <include file="peg/peg_sensors.xml" />
+  </sensor>
+</mujoco>

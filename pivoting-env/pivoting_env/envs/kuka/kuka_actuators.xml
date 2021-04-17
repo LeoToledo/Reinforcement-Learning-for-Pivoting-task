@@ -1,0 +1,14 @@
+<mujoco>
+ <motor name="kuka_joint_1" ctrllimited="true" ctrlrange="-300.0 300.0" joint="kuka_joint_1"/>
+ <motor name="kuka_joint_2" ctrllimited="true" ctrlrange="-300.0 300.0" joint="kuka_joint_2"/>
+ <motor name="kuka_joint_3" ctrllimited="true" ctrlrange="-300.0 300.0" joint="kuka_joint_3"/>
+ <motor name="kuka_joint_4" ctrllimited="true" ctrlrange="-300.0 300.0" joint="kuka_joint_4"/>
+ <motor name="kuka_joint_5" ctrllimited="true" ctrlrange="-300.0 300.0" joint="kuka_joint_5"/>
+ <motor name="kuka_joint_6" ctrllimited="true" ctrlrange="-300.0 300.0" joint="kuka_joint_6"/>
+<!-- <position joint='kuka_joint_6' name='kuka_joint_6' kp="30" ctrlrange='-0.785398 0.785398' forcelimited='true' forcerange='-25 25'/> -->
+ <motor name="kuka_joint_7" ctrllimited="true" ctrlrange="-300.0 300.0" joint="kuka_joint_7"/>
+
+<!-- Atuador do gripper -->
+  <!-- <position joint='gripper_joint' name='gripper' kp="90" ctrlrange='0.006 0.009'/> -->
+  <motor name="gripper" joint="gripper_joint_upper" ctrllimited="true" ctrlrange="-50 50"/>
+</mujoco>
