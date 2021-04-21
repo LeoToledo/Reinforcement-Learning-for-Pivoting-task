@@ -8,5 +8,5 @@ Após clonar o arquivo, rode os seguintes comandos:
       pip install -e .
 
 Para rodar: 
-      python main.py
-      python run_policy.py
+      python train_model.py
+      python test_model.py
