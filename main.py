@@ -1,4 +1,4 @@
-from spinup import ppo_pivoting_tf1 as ppo
+from spinup import ppo_tf1 as ppo
 import tensorflow as tf
 import gym
 import pivoting_env
