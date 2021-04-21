@@ -10,5 +10,4 @@ Após clonar o arquivo, rode os seguintes comandos:
 Para rodar: 
 
       python train_model.py
-      
       python test_model.py
