@@ -1,4 +1,4 @@
-from spinup.utils.test_policy import load_policy_and_env, run_policy
+from run_policy.test_policy import load_policy_and_env, run_policy
 import pivoting_env
 import gym
 from datetime import datetime
@@ -10,4 +10,4 @@ PATH = 'data/' + today + '_' + SAVE_FILE_NAME
 
 _, get_action = load_policy_and_env(PATH)
 env = gym.make('pivoting-v0')
-run_policy(env, get_action)
+run_policy(env, get_action, num_episodes=20, render=False)
