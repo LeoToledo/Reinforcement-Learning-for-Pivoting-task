@@ -14,7 +14,7 @@ RENDER = 0
 
 # Plot path
 today = datetime.today().strftime('%Y-%m-%d')
-file_name = 'teste1'
+file_name = '3000epochs-full-action-space-2'
 PLOT_PATH = 'data/Reward Plots/' + today + file_name
 
 class PivotingEnv(mujoco_env.MujocoEnv, utils.EzPickle):
