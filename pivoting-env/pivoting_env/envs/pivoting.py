@@ -1,21 +1,18 @@
 import numpy as np
 from gym import utils
 from pivoting_env.envs import mujoco_env
-import matplotlib.pyplot as plt
-import math
 from pivoting_env.envs.controllers_utils import CtrlUtils
-from datetime import datetime
+import os
+import yaml
 
-MAX_EP_LEN = 1000
+# Read YAML file
+with open(f'{os.getcwd()}/parameters.yaml', 'r') as file_descriptor:
+    parameters = yaml.load(file_descriptor)
+
+MAX_EP_LEN = parameters['model']['max_ep_len']
 N_JOINTS = 7
 JOINT_6 = 5
 JOINT_3 = 3
-RENDER = 0
-
-# Plot path
-today = datetime.today().strftime('%Y-%m-%d')
-file_name = '3000epochs-full-action-space-2'
-PLOT_PATH = 'data/Reward Plots/' + today + file_name
 
 class PivotingEnv(mujoco_env.MujocoEnv, utils.EzPickle):
 
@@ -105,19 +102,16 @@ class PivotingEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         # Angulo relativo entre a ferramenta e o gripper
         angle_error = ob[0]
         current_angle = angle_error + desired_angle
-        # print("ANGULO ATUAL: ", current_angle)
+
         # Checa se está na região de sucesso
         if (current_angle >= (desired_angle - erro) and current_angle <= (desired_angle + erro)):
-            reward = (-1) * np.abs(current_angle - desired_angle) / 200
+            reward = (-1) * np.abs(current_angle - desired_angle) / parameters['model']['reward']['zeta_convergence']
             self.counter = self.counter + 1
             done = 0
 
             # Caso fique uma quantidade de tempo na região de sucesso
-            if (self.counter > 120):
-                print("*********************Completou***********************")
-                print(" || Episodio: ", self.ep, " || Reward: ", np.round(self.ep_ret, 0), " || Steps: ", self.ep_len,
-                      " || Angulo Final: ", np.round(angle_error + desired_angle, 3), " || Target: ", desired_angle)
-                reward = 10
+            if (self.counter > parameters['model']['reward']['steps_to_converge']):
+                reward = parameters['model']['reward']['of_sucess']
 
                 # Zerando o contador de tempo na zona de sucesso
                 self.counter = 0
@@ -132,7 +126,7 @@ class PivotingEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         # Se não completar
         else:
             self.counter = 0
-            reward = (-1) * np.abs(current_angle - desired_angle) / 100
+            reward = (-1) * np.abs(current_angle - desired_angle) / parameters['model']['reward']['zeta']
             done = 0
 
         # Reward total e duração do episodio
@@ -140,13 +134,6 @@ class PivotingEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         self.ep_len += 1
 
         if (self.current_step == MAX_EP_LEN):
-            # Printando resultados
-            print(" || Episodio: ", self.ep, " || Reward: ", np.round(self.ep_ret, 0), " || Steps: ", self.ep_len,
-                  " || Angulo Final: ", np.round(angle_error + desired_angle, 3), " || Target: ", desired_angle)
-
-            # Plot Rewards results
-            self.plot_results(plot_path=PLOT_PATH)
-
             # Zerando a duração do episodio
             self.ep_len = 0
             # Atualizando o episodio atual
@@ -187,9 +174,6 @@ class PivotingEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         self.sim.data.ctrl[-1] = a[-1] # ação de controle na garra. Esse aqui é tudo por conta do PPO
         self.sim.step()
 
-        # Render simulation
-        self.render_sim(each_n_episodes=20, frame_skip_rate=2, dont_render=not(RENDER))
-
         # Get observation
         ob = self._get_obs()
 
@@ -209,18 +193,22 @@ class PivotingEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         qpos = np.concatenate((qpos_init_robot, qpos_init_gripper, qpos_init_tool))
         qvel = self.init_qvel
 
-	    # Atualizando o numero do episódio e steps atuais. Está com gambiarra
+        # Atualizando o numero do episódio e steps atuais. Está com gambiarra
         self.ep += 1       
         self.counter = 0
         self.current_step = 0
 
-	    # Definindo o angulo desejado(target)
-        self.desired_angle = np.random.randint(-30, 30)
+        # Definindo o angulo desejado(target)
+        range_degree = int(parameters['model']['degree_range'])
+        self.desired_angle = np.random.randint(-range_degree, range_degree)
         while(self.desired_angle == 0):
-            self.desired_angle = np.random.randint(-30, 30)
+            self.desired_angle = np.random.randint(-range_degree, range_degree)
         
         # Definindo o erro aceitável para a conclusão do objetivo
-        self.erro = min(np.abs(self.desired_angle/7), 3)
+        acceptable_error_percentage = parameters['model']['acceptable_error_percentage']
+        max_acceptable_error = parameters['model']['max_acceptable_error']
+        self.erro = min(np.abs(self.desired_angle*acceptable_error_percentage), 3)
+
         if( (self.desired_angle) <= 6 or (self.desired_angle) >= -6):
             self.erro = self.erro + 0.3
 
@@ -264,38 +252,5 @@ class PivotingEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         v.cam.trackbodyid = 0
         v.cam.distance = self.model.stat.extent + 0.7
 
-    def render_sim(self, each_n_episodes=20, frame_skip_rate=2, dont_render=0):
-        if dont_render:
-            return
-        if(self.ep % each_n_episodes and self.current_step%frame_skip_rate == 0):
-            self.sim.render(mode="window")
 
-
-    def plot_results(self, plot_path):
-        self.ep_ret_list.append(self.ep_ret)
-
-        # Fazendo uma média das rewards
-        N = 40
-        cumsum, moving_aves = [0], []
-
-        for i, x in enumerate(self.ep_ret_list, 1):
-            cumsum.append(cumsum[i - 1] + x)
-            if i >= N:
-                moving_ave = (cumsum[i] - cumsum[i - N]) / N
-                # can do stuff with moving_ave here
-                moving_aves.append(moving_ave)
-
-        # Reward
-        # plt.figure(num=None, figsize=(20, 12), dpi=120, facecolor='w', edgecolor='k')
-        plt.xticks(np.arange(0, 2001, step=500), fontsize=10)
-        plt.yticks(fontsize=10)
-        plt.plot(moving_aves, color='r', label="Torque-Controlled", linewidth=1.5)
-        plt.legend(loc="lower right", fontsize=8)
-        plt.ylabel("Reward", fontsize=8)
-        plt.xlabel("Episode", fontsize=8)
-        plt.grid(True, linestyle='-', which='major', color='lightgrey', alpha=0.7)
-        plt.title('Mean Reward Per Episode', fontsize=10)
-        plt.savefig(plot_path)
-        plt.close()
-        total_ret = []
 
