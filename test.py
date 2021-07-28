@@ -1,6 +1,7 @@
 import time
 import gym
 from PPO.PPO import PPO
+import pivoting_env
 import yaml
 
 # Read YAML file
@@ -12,22 +13,22 @@ def test():
     print("============================================================================================")
 
     ################## hyperparameters ##################
-    env_name = "Ant-v2"
-    has_continuous_action_space = True
-    max_ep_len = 1000           # max timesteps in one episode
-    action_std = 0.1            # set same std for action distribution which was used while saving
+    env_name = parameters['model']['env_name']
+    has_continuous_action_space = parameters['model']['has_continuous_action_space']
+    max_ep_len = parameters['model']['max_ep_len']           # max timesteps in one episode
+    action_std = parameters['ppo']['action_parameters']['min_action_std']           # set same std for action distribution which was used while saving
 
     render = parameters['test']['render']              # render environment on screen
     frame_delay = 0             # if required; add delay b/w frames
 
-    total_test_episodes = 10    # total num of testing episodes
+    total_test_episodes = parameters['test']['number_of_test_episodes']     # total num of testing episodes
 
-    K_epochs = 80               # update policy for K epochs
-    eps_clip = 0.2              # clip parameter for PPO
-    gamma = 0.99                # discount factor
+    K_epochs = parameters['ppo']['hyperparameters']['k_epochs']                # update policy for K epochs
+    eps_clip = parameters['ppo']['hyperparameters']['eps_clip']               # clip parameter for PPO
+    gamma = parameters['ppo']['hyperparameters']['gamma']                # discount factor
 
-    lr_actor = 0.0003           # learning rate for actor
-    lr_critic = 0.001           # learning rate for critic
+    lr_actor = parameters['agent']['mlp']['lr_actor']           # learning rate for actor
+    lr_critic = parameters['agent']['mlp']['lr_critic']           # learning rate for critic
     #####################################################
 
 
@@ -54,7 +55,7 @@ def test():
 
 
     directory = "PPO/PPO_preTrained" + '/' + env_name + '/'
-    checkpoint_path = directory + "PPO_{}_{}_{}.pth".format(env_name, random_seed, run_num_pretrained)
+    checkpoint_path = directory + parameters['test']['model_name']
     print("loading network from : " + checkpoint_path)
 
     ppo_agent.load(checkpoint_path)

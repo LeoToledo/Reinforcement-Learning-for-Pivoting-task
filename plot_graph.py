@@ -1,6 +1,11 @@
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
+import yaml
+
+# Read YAML file
+with open('./parameters.yaml', 'r') as file_descriptor:
+    parameters = yaml.load(file_descriptor)
 
 def save_graph():
 
@@ -38,7 +43,7 @@ def save_graph():
         os.makedirs(figures_dir)
 
 
-    fig_save_path = figures_dir + '/PPO_' + env_name + '_fig_' + str(fig_num) + '.png'
+    fig_save_path = figures_dir + parameters['train']['model_name'] + '_reward.png'
 
 
     # get number of log files in directory
@@ -52,7 +57,7 @@ def save_graph():
 
     for run_num in range(num_runs):
 
-        log_f_name = log_dir + '/PPO_' + env_name + "_log_" + str(run_num) + ".csv"
+        log_f_name = log_dir + parameters['train']['model_name'] + '_log.csv'
         print("loading data from : " + log_f_name)
         data = pd.read_csv(log_f_name)
         data = pd.DataFrame(data)

@@ -1,11 +1,14 @@
 agent:
   mlp:
-    architecture: [15, 25, 20]
+    architecture: [64, 32, 8]
+    lr_actor: 0.0003                  # learning rate for actor network
+    lr_critic: 0.001                  # learning rate for critic network
 
 model:
   env_name: "pivoting-v0"
+#  env_name: "HumanoidStandup-v2"
   has_continuous_action_space: True  # continuous action space; else discrete
-  max_ep_len: 1000                   # max timesteps in one episode
+  max_ep_len: 3000                   # max timesteps in one episode
   max_training_timesteps: 3000000    # break training loop if timeteps > max_training_timesteps
 
   degree_range: 30                   # sets target angles between [-degree_range + degree_range]
@@ -29,8 +32,6 @@ ppo:
     k_epochs: 80                      # update policy for K epochs in one PPO update
     eps_clip: 0.2                     # clip parameter for PPO
     gamma: 0.99                       # discount factor
-    lr_actor: 0.0003                  # learning rate for actor network
-    lr_critic: 0.001                  # learning rate for critic network
     random_seed: 42                   # set random seed if required (0 = no random seed)
 
   action_parameters:
@@ -41,7 +42,10 @@ ppo:
 
 train:
   render: 0
-  render_each_n_episodes: 15
+  render_each_n_episodes: 2000
+  model_name: 'pivoting_1'
 
 test:
-  render: 0
+  render: 1
+  number_of_test_episodes: 10
+  model_name: 'pivoting_1'

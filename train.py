@@ -45,8 +45,8 @@ def train():
     K_epochs = parameters['ppo']['hyperparameters']['k_epochs']                                      # update policy for K epochs in one PPO update
     eps_clip = parameters['ppo']['hyperparameters']['eps_clip']                                      # clip parameter for PPO
     gamma = parameters['ppo']['hyperparameters']['gamma']                                            # discount factor
-    lr_actor = parameters['ppo']['hyperparameters']['lr_actor']                                      # learning rate for actor network
-    lr_critic = parameters['ppo']['hyperparameters']['lr_critic']                                    # learning rate for critic network
+    lr_actor = parameters['agent']['mlp']['lr_actor']                                                # learning rate for actor network
+    lr_critic = parameters['agent']['mlp']['lr_critic']                                              # learning rate for critic network
     random_seed = parameters['ppo']['hyperparameters']['random_seed']                                # set random seed if required (0 = no random seed)
     #####################################################
 
@@ -84,7 +84,7 @@ def train():
 
 
     #### create new log file for each run
-    log_f_name = log_dir + '/PPO_' + env_name + "_log_" + str(run_num) + ".csv"
+    log_f_name = log_dir + parameters['train']['model_name'] + '_log.csv'
 
     print("current logging run number for " + env_name + " : ", run_num)
     print("logging at : " + log_f_name)
@@ -105,7 +105,8 @@ def train():
           os.makedirs(directory)
 
 
-    checkpoint_path = directory + "PPO_{}_{}_{}.pth".format(env_name, random_seed, run_num_pretrained)
+    # checkpoint_path = directory + "PPO_{}_{}_{}.pth".format(env_name, random_seed, run_num_pretrained)
+    checkpoint_path = directory + parameters['train']['model_name']
     print("save checkpoint path : " + checkpoint_path)
 
     #####################################################
@@ -224,7 +225,7 @@ def train():
                 ppo_agent.decay_action_std(action_std_decay_rate, min_action_std)
 
             # log in logging file
-            if time_step % log_freq == 0:
+            if time_step % log_freq == 0 and log_running_episodes != 0:
 
                 # log average reward till last episode
                 log_avg_reward = log_running_reward / log_running_episodes
