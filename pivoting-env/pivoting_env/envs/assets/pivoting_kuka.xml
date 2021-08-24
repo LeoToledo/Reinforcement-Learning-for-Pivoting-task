@@ -74,7 +74,7 @@
 
      <!-- <body name="tool_1" pos="0.1 0 1.785" euler="0 0 0"> esse cara é a posicao que eu quero do corpo no fim-->
     <body name="tool_1" pos="0.1 0 1.785" euler="0 0 0">
-        <geom class="collision" type="box" size="0.1225 0.0575 .0035" pos="0.225 0 0" rgba=".3 .7 .5 1"/>
+        <geom class="collision" type="box" size="0.1225 0.0575 .003075" pos="0.225 0 -0.01" rgba=".3 .7 .5 1" density="426" friction="1.8 0.005 0.0001"/>
         <joint name="tool" type="free" limited='false' damping="0" armature="0"/> -->
 
       <!--Linha de Referência -->

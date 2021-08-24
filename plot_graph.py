@@ -11,7 +11,7 @@ def save_graph():
 
     print("============================================================================================")
 
-    env_name = 'Ant-v2'
+    env_name = parameters['model']['env_name']
     fig_num = 0     #### change this to prevent overwriting figures in same env_name folder
     plot_avg = True    # plot average of all runs; else plot all runs separately
     fig_width = 10
@@ -127,7 +127,8 @@ def save_graph():
 
     print("============================================================================================")
 
-
+    # plt.ylim((-25000, 100))
+    # plt.ylim((-5000, 100))
     plt.show()
 
 
