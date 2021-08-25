@@ -1,29 +1,30 @@
 agent:
   mlp:
-    architecture: [64, 32, 8]
+#    architecture: [32, 8, 6]
+    architecture: [32, 16, 4]
     lr_actor: 0.0003                  # learning rate for actor network
     lr_critic: 0.001                  # learning rate for critic network
 
 model:
   env_name: "pivoting-v0"
-#  env_name: "HumanoidStandup-v2"
-  has_continuous_action_space: True  # continuous action space; else discrete
-  max_ep_len: 3000                   # max timesteps in one episode
-  max_training_timesteps: 3000000    # break training loop if timeteps > max_training_timesteps
+#  ppo_acting_joints: [5, 6, 7]
+  ppo_acting_joints: [5, 7]
+  control_method: 3                 #3: PPO+CONTROL on chosen joits, 4: PPO ONLY on chosen joints
+
+  max_ep_len: 12000                   # max timesteps in one episode
+  number_of_episodes: 15000             # break training loop if timeteps > max_training_timesteps
+
 
   degree_range: 30                   # sets target angles between [-degree_range + degree_range]
-  acceptable_error_percentage: 15    # acceptable percentage of error to consider a sucess angle
-  max_acceptable_error: 3            # maximum acceptable error(in degrees) to consider a sucess angle
+  acceptable_error_percentage: 0.15  # acceptable percentage of error to consider a sucess angle
+  max_acceptable_error: 5            # maximum acceptable error(in degrees) to consider a sucess angle
 
   reward:
     of_sucess: 10
-    steps_to_converge: 120           # steps the agent needs to remain inside the success zone to consider a successful task
-    zeta_convergence: 200            # used to calculate the reward (-1) * np.abs(current_angle - desired_angle) / parameters['model']['reward']['zeta_convergence']
-    zeta: 100                        # used to calculate the reward (-1) * np.abs(current_angle - desired_angle) / parameters['model']['reward']['zeta_convergence']
+    steps_to_converge: 500           # steps the agent needs to remain inside the success zone to consider a successful task
 
 logs:
-  print_freq: 5000                    # print avg reward in the interval (in num timesteps)
-  log_freq: 2000                      # log avg reward in the interval (in num timesteps)
+  log_freq: 1000                      # log avg reward in the interval (in num timesteps)
   save_model_freq: 100000             # save model frequency (in num timesteps)
 
 ppo:
@@ -38,11 +39,11 @@ ppo:
     action_std: 0.6                    # starting std for action distribution (Multivariate Normal)
     action_std_decay_rate: 0.05        # linearly decay action_std (action_std = action_std - action_std_decay_rate)
     min_action_std: 0.1                # minimum action_std (stop decay after action_std <= min_action_std)
-    action_std_decay_freq: 250000      # action_std decay frequency (in num timesteps)
+    action_std_decay_freq: 10          # action_std decay frequency (in episodes)
 
 train:
   render: 0
-  render_each_n_episodes: 2000
+  render_each_n_episodes: 50
   model_name: 'pivoting_1'
 
 test:
