@@ -110,11 +110,11 @@ class PivotingEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         self.current_step += 1
 
         # Checa se caiu no chão
-        if ob[2] != 0:
-            reward = -10000
-            done = 1
-            self.drop = True
-            return ob, reward, done, {}
+        # if ob[2] != 0:
+        #     reward = -1000
+        #     done = 1
+        #     self.drop = True
+        #     return ob, reward, done, {}
 
         # print(f'Desired: {np.round(self.desired_angle, 1)} \t '
         #       f'Current: {np.round(self.tool2gripper_angle, 1)} \t'
@@ -124,7 +124,7 @@ class PivotingEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         # Checa se está na região de sucesso
         if np.abs(self.tool2gripper2desired_angle) < self.acceptable_error:
 
-            reward = ((-1) * np.abs(self.tool2gripper2desired_angle) / np.abs(2*parameters['model']['degree_range']))
+            reward = ((-1) * np.abs(self.tool2gripper2desired_angle) / np.abs(2*parameters['model']['degree_range'])) - ob[2]/2
             self.counter = self.counter + 1
             done = 0
 
@@ -145,7 +145,7 @@ class PivotingEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         # Se não completar
         else:
             self.counter = 0
-            reward = ((-1) * np.abs(self.tool2gripper2desired_angle) / np.abs(2*parameters['model']['degree_range']))
+            reward = ((-1) * np.abs(self.tool2gripper2desired_angle) / np.abs(2*parameters['model']['degree_range'])) - ob[2]/2
             done = 0
 
         # Reward total e duração do episodio
@@ -264,6 +264,10 @@ class PivotingEnv(mujoco_env.MujocoEnv, utils.EzPickle):
 
         # Gripper's velocity
         grippers_vel = self.sim.data.get_joint_qvel("kuka_joint_6")
+
+        # Gripper's position
+        grippers_pos = self.sim.data.get_joint_qpos("kuka_joint_6")
+
         # Tool's velocity relative to gripper
         tools_vel = self.sim.data.get_joint_qvel("tool")
         tools_vel = tools_vel[5]  # Tool's global velocity
@@ -288,7 +292,7 @@ class PivotingEnv(mujoco_env.MujocoEnv, utils.EzPickle):
 
         obs = np.concatenate(
             [[self.tool2gripper_angle - self.desired_angle], [tools_vel], [drop], [grippers_dist], [tools_x], [tools_y],
-              [rotational_joint], [grippers_vel]] ).ravel()
+              [rotational_joint], [grippers_vel], [grippers_pos]] ).ravel()
         return obs
 
     def viewer_setup(self):

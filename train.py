@@ -148,17 +148,13 @@ def train():
         state = env.reset()
         current_ep_reward = 0
 
+        time_step_old = 0
         for t in range(1, max_ep_len + 1):
             # render
             if render and i_episode % render_each_n_episodes == 0:
                 env.render()
                 time.sleep(frame_delay)
 
-            ####!!!!!@#####
-            # Discretize state space to train the network
-            # state[0] = (state[0] / 180) * np.pi
-
-            #######
             # select action with policy
             action = ppo_agent.select_action(state)
             ####!!!!!@#####
@@ -209,11 +205,14 @@ def train():
         log_running_reward += current_ep_reward
         log_running_episodes += 1
 
-        print(f"Episode : {i_episode} \t Timestep : {time_step} \t Average Reward : {int(current_ep_reward)} \t "
+        print(f"Episode : {i_episode} \t Timestep : {time_step - time_step_old} \t Average Reward : {int(current_ep_reward)} \t "
               f"Real : {int(env.get_current_angle())} \t Target : {env.get_desired_angle()}  "
               f"\t Sucess : {done - env.get_drop_bool()}")
 
         i_episode += 1
+
+    # Updates Timestep
+    time_step_old = time_step
 
     log_f.close()
     env.close()
@@ -232,7 +231,7 @@ def rescale_action_space(scale_factor, action):
     action_temp[parameters['model']['ppo_acting_joints']] = action * scale_factor
 
     #### GAMB
-    # action_temp[6] = action_temp[6]/2
+    # action_temp[6] = action_temp[6]/5
 
     if action_temp[7] > 0:
         action_temp[7] = 10

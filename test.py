@@ -72,13 +72,13 @@ def test():
 
             ####!!!!!@#####
             # Discretize state space to train the network
-            state[0] = (state[0] / 180) * np.pi
+            # state[0] = (state[0] / 180) * np.pi
             #######
 
             action = ppo_agent.select_action(state)
 
             ####!!!!!@#####
-            action = rescale_action_space(scale_factor=8, action=action)
+            action = rescale_action_space(scale_factor=15, action=action)
             #######
 
             state, reward, done, _ = env.step(action)
@@ -105,10 +105,13 @@ def rescale_action_space(scale_factor, action):
     action_temp = np.zeros(8)
     action_temp[parameters['model']['ppo_acting_joints']] = action * scale_factor
 
+    #### GAMB
+    # action_temp[6] = action_temp[6]/5
+
     if action_temp[7] > 0:
-        action_temp[7] = 1
+        action_temp[7] = 10
     else:
-        action_temp[7] = -1
+        action_temp[7] = -10
     return action_temp
 
 

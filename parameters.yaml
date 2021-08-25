@@ -1,6 +1,7 @@
 agent:
   mlp:
-    architecture: [64, 32, 32, 4]
+#    architecture: [32, 8, 6]
+    architecture: [32, 16, 4]
     lr_actor: 0.0003                  # learning rate for actor network
     lr_critic: 0.001                  # learning rate for critic network
 
@@ -10,17 +11,17 @@ model:
   ppo_acting_joints: [5, 7]
   control_method: 3                 #3: PPO+CONTROL on chosen joits, 4: PPO ONLY on chosen joints
 
-  max_ep_len: 4000                   # max timesteps in one episode
-  number_of_episodes: 10000             # break training loop if timeteps > max_training_timesteps
+  max_ep_len: 12000                   # max timesteps in one episode
+  number_of_episodes: 15000             # break training loop if timeteps > max_training_timesteps
 
 
   degree_range: 30                   # sets target angles between [-degree_range + degree_range]
   acceptable_error_percentage: 0.15  # acceptable percentage of error to consider a sucess angle
-  max_acceptable_error: 3            # maximum acceptable error(in degrees) to consider a sucess angle
+  max_acceptable_error: 5            # maximum acceptable error(in degrees) to consider a sucess angle
 
   reward:
-    of_sucess: 1000
-    steps_to_converge: 1000           # steps the agent needs to remain inside the success zone to consider a successful task
+    of_sucess: 10
+    steps_to_converge: 500           # steps the agent needs to remain inside the success zone to consider a successful task
 
 logs:
   log_freq: 1000                      # log avg reward in the interval (in num timesteps)
@@ -38,10 +39,10 @@ ppo:
     action_std: 0.6                    # starting std for action distribution (Multivariate Normal)
     action_std_decay_rate: 0.05        # linearly decay action_std (action_std = action_std - action_std_decay_rate)
     min_action_std: 0.1                # minimum action_std (stop decay after action_std <= min_action_std)
-    action_std_decay_freq: 30          # action_std decay frequency (in episodes)
+    action_std_decay_freq: 10          # action_std decay frequency (in episodes)
 
 train:
-  render: 1
+  render: 0
   render_each_n_episodes: 50
   model_name: 'pivoting_1'
 
