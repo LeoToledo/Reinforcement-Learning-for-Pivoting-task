@@ -70,6 +70,10 @@ def test():
 
         for t in range(1, max_ep_len + 1):
 
+            #####################
+            state[[3]] = state[[3]] * 100
+            #####################
+
             action = ppo_agent.select_action(state)
 
             ####!!!!!@#####
