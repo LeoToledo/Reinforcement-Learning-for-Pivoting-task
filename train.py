@@ -142,19 +142,23 @@ def train():
     time_step = 0
     i_episode = 0
 
+    time_step_old = 0
     # training loop
     while time_step <= max_training_timesteps:
 
         state = env.reset()
         current_ep_reward = 0
 
-        time_step_old = 0
         for t in range(1, max_ep_len + 1):
             # render
             if render and i_episode % render_each_n_episodes == 0:
                 env.render()
                 time.sleep(frame_delay)
 
+
+            #####################
+            state[[3]] = state[[3]]*100
+            #####################
             # select action with policy
             action = ppo_agent.select_action(state)
             ####!!!!!@#####
@@ -209,10 +213,11 @@ def train():
               f"Real : {int(env.get_current_angle())} \t Target : {env.get_desired_angle()}  "
               f"\t Sucess : {done - env.get_drop_bool()}")
 
+        # Updates Timestep
+        time_step_old = time_step
+
         i_episode += 1
 
-    # Updates Timestep
-    time_step_old = time_step
 
     log_f.close()
     env.close()
@@ -230,13 +235,10 @@ def rescale_action_space(scale_factor, action):
     action_temp = np.zeros(8)
     action_temp[parameters['model']['ppo_acting_joints']] = action * scale_factor
 
-    #### GAMB
-    # action_temp[6] = action_temp[6]/5
-
     if action_temp[7] > 0:
-        action_temp[7] = 10
+        action_temp[7] = 25
     else:
-        action_temp[7] = -10
+        action_temp[7] = -25
     return action_temp
 
 

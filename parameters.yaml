@@ -1,7 +1,7 @@
 agent:
   mlp:
-#    architecture: [32, 8, 6]
-    architecture: [32, 16, 4]
+    architecture: [64, 32, 6]
+#    architecture: [32, 16, 4]
     lr_actor: 0.0003                  # learning rate for actor network
     lr_critic: 0.001                  # learning rate for critic network
 
@@ -11,7 +11,7 @@ model:
   ppo_acting_joints: [5, 7]
   control_method: 3                 #3: PPO+CONTROL on chosen joits, 4: PPO ONLY on chosen joints
 
-  max_ep_len: 12000                   # max timesteps in one episode
+  max_ep_len: 2000                   # max timesteps in one episode
   number_of_episodes: 15000             # break training loop if timeteps > max_training_timesteps
 
 
@@ -20,7 +20,7 @@ model:
   max_acceptable_error: 5            # maximum acceptable error(in degrees) to consider a sucess angle
 
   reward:
-    of_sucess: 10
+    of_sucess: 100
     steps_to_converge: 500           # steps the agent needs to remain inside the success zone to consider a successful task
 
 logs:
@@ -36,17 +36,17 @@ ppo:
     random_seed: 42                   # set random seed if required (0 = no random seed)
 
   action_parameters:
-    action_std: 0.6                    # starting std for action distribution (Multivariate Normal)
+    action_std: 0.7                    # starting std for action distribution (Multivariate Normal)
     action_std_decay_rate: 0.05        # linearly decay action_std (action_std = action_std - action_std_decay_rate)
     min_action_std: 0.1                # minimum action_std (stop decay after action_std <= min_action_std)
-    action_std_decay_freq: 10          # action_std decay frequency (in episodes)
+    action_std_decay_freq: 15          # action_std decay frequency (in episodes)
 
 train:
-  render: 0
-  render_each_n_episodes: 50
+  render: 1
+  render_each_n_episodes: 1
   model_name: 'pivoting_1'
 
 test:
   render: 1
-  number_of_test_episodes: 10
+  number_of_test_episodes: 100
   model_name: 'pivoting_1'

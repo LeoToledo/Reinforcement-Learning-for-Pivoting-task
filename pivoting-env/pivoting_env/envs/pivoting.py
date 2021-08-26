@@ -111,7 +111,7 @@ class PivotingEnv(mujoco_env.MujocoEnv, utils.EzPickle):
 
         # Checa se caiu no chão
         # if ob[2] != 0:
-        #     reward = -1000
+        #     reward = -10000
         #     done = 1
         #     self.drop = True
         #     return ob, reward, done, {}
@@ -288,11 +288,14 @@ class PivotingEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         # Upper and Lower Gripper distance
         grippers_dist = self.sim.data.get_joint_qpos("gripper_joint_upper")
 
-        # obs = np.concatenate([[self.tool2gripper_angle - self.desired_angle], [tools_x], [grippers_vel], [tools_vel], [drop], [tools_y]]).ravel()
+        # obs = np.concatenate(
+        #     [[self.tool2gripper_angle - self.desired_angle], [tools_vel], [drop], [grippers_dist], [tools_x], [tools_y],
+        #       [rotational_joint], [grippers_vel], [grippers_pos]] ).ravel()
 
         obs = np.concatenate(
-            [[self.tool2gripper_angle - self.desired_angle], [tools_vel], [drop], [grippers_dist], [tools_x], [tools_y],
-              [rotational_joint], [grippers_vel], [grippers_pos]] ).ravel()
+            [[self.tool2gripper_angle - self.desired_angle], [tools_vel], [drop],
+            [grippers_vel], [grippers_pos]]).ravel()
+
         return obs
 
     def viewer_setup(self):
