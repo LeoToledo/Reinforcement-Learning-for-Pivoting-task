@@ -1,5 +1,7 @@
 import time
 import gym
+import pandas as pd
+
 from PPO.PPO import PPO
 import numpy as np
 import pivoting_env
@@ -64,6 +66,8 @@ def test():
 
     test_running_reward = 0
 
+    logs = {'episode': [], 'timestep': [], 'action': [], 'state': [], 'reward': [], 'done': [], 'new_state': [],
+            'angle_before_act': [], 'angle_after_act': [], 'desired_angle': []}
     for ep in range(1, total_test_episodes + 1):
         ep_reward = 0
         state = env.reset()
@@ -74,14 +78,32 @@ def test():
             state[[3]] = state[[3]] * 100
             #####################
 
+            # Append to log file
+            logs['state'].append(state)
+            logs['episode'].append(ep)
+            logs['timestep'].append(t)
+            logs['angle_before_act'].append(env.get_current_angle())
+            logs['desired_angle'].append(env.get_desired_angle())
+
             action = ppo_agent.select_action(state)
 
             ####!!!!!@#####
             action = rescale_action_space(scale_factor=15, action=action)
             #######
 
+            # Append to log file
+            logs['action'].append(action)
+
             state, reward, done, _ = env.step(action)
             ep_reward += reward
+
+            # Append to log file
+            aux_state = state.copy()
+            aux_state[3] = aux_state[3]*100
+            logs['new_state'].append(aux_state)
+            logs['reward'].append(reward)
+            logs['done'].append(done)
+            logs['angle_after_act'].append(env.get_current_angle())
 
             if render:
                 env.render()
@@ -94,10 +116,15 @@ def test():
         ppo_agent.buffer.clear()
 
         print(
-            f"Episode : {ep} \t Average Reward : {int(ep_reward)} \t Real : {int(env.get_current_angle())} "
+            f"Episode : {ep} \t Timestep : {t} \t Average Reward : {int(ep_reward)} "
+            f"\t Real : {int(env.get_current_angle())} "
             f"\t Target : {env.get_desired_angle()} \t Sucess : {done - env.get_drop_bool()}")
 
     env.close()
+
+    # Save log file into a csv
+    logs_df = pd.DataFrame(logs)
+    logs_df.to_csv('logs/logs.csv', index=False)
 
 
 def rescale_action_space(scale_factor, action):
