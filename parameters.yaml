@@ -1,7 +1,8 @@
 agent:
   mlp:
-    architecture: [64, 32, 6]
-#    architecture: [32, 16, 4]
+#    architecture: [64, 32, 6]
+    architecture: [64, 32, 16, 4]
+
     lr_actor: 0.0003                  # learning rate for actor network
     lr_critic: 0.001                  # learning rate for critic network
 
@@ -11,10 +12,12 @@ model:
   ppo_acting_joints: [5, 7]
   control_method: 3                 #3: PPO+CONTROL on chosen joits, 4: PPO ONLY on chosen joints
 
-  max_ep_len: 2000                   # max timesteps in one episode
+  max_ep_len: 2500                   # max timesteps in one episode
   number_of_episodes: 15000             # break training loop if timeteps > max_training_timesteps
 
 
+  activate_occlusion: False
+  failure_rate: 0.005
   degree_range: 30                   # sets target angles between [-degree_range + degree_range]
   acceptable_error_percentage: 0.15  # acceptable percentage of error to consider a sucess angle
   max_acceptable_error: 5            # maximum acceptable error(in degrees) to consider a sucess angle
@@ -42,11 +45,12 @@ ppo:
     action_std_decay_freq: 15          # action_std decay frequency (in episodes)
 
 train:
-  render: 1
+  render: 0
   render_each_n_episodes: 1
-  model_name: 'pivoting_1'
+  model_name: 'pivoting_temp'
 
 test:
   render: 1
-  number_of_test_episodes: 10
+  number_of_test_episodes: 1000
+  log_results: False
   model_name: 'pivoting_1'

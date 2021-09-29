@@ -6,13 +6,15 @@ from PPO.PPO import PPO
 import numpy as np
 import pivoting_env
 import yaml
+from utils.utils import rescale_action_space
+from utils.utils import DataImputation
 
 # Read YAML file
 with open('./parameters.yaml', 'r') as file_descriptor:
     parameters = yaml.load(file_descriptor)
 
 
-def test():
+def test(imputer):
     global done
     print("============================================================================================")
 
@@ -34,6 +36,10 @@ def test():
 
     lr_actor = parameters['agent']['mlp']['lr_actor']  # learning rate for actor
     lr_critic = parameters['agent']['mlp']['lr_critic']  # learning rate for critic
+
+    activate_occlusion = parameters['model']['activate_occlusion']
+    failure_rate = parameters['model']['failure_rate']
+    log_results = parameters['test']['log_results']
     #####################################################
 
     env = gym.make(env_name)
@@ -66,24 +72,32 @@ def test():
 
     test_running_reward = 0
 
-    logs = {'episode': [], 'timestep': [], 'action': [], 'state': [], 'reward': [], 'done': [], 'new_state': [],
-            'angle_before_act': [], 'angle_after_act': [], 'desired_angle': []}
+    if log_results:
+        logs = {'episode': [], 'timestep': [], 'action': [], 'state': [], 'reward': [], 'done': [], 'new_state': [],
+                'angle_before_act': [], 'angle_after_act': [], 'desired_angle': []} # 'sucess': []
     for ep in range(1, total_test_episodes + 1):
         ep_reward = 0
         state = env.reset()
 
         for t in range(1, max_ep_len + 1):
 
+            # Occlusion system
+            if activate_occlusion:
+                trigger_failure = True if (1 - np.random.random()) <= failure_rate else False
+                if (imputer.occlusion == True) or (imputer.occlusion == False and trigger_failure):
+                    imputer.update_duration()
+
             #####################
             state[[3]] = state[[3]] * 100
             #####################
 
             # Append to log file
-            logs['state'].append(state)
-            logs['episode'].append(ep)
-            logs['timestep'].append(t)
-            logs['angle_before_act'].append(env.get_current_angle())
-            logs['desired_angle'].append(env.get_desired_angle())
+            if log_results:
+                logs['state'].append(state)
+                logs['episode'].append(ep)
+                logs['timestep'].append(t)
+                logs['angle_before_act'].append(env.get_current_angle())
+                logs['desired_angle'].append(env.get_desired_angle())
 
             action = ppo_agent.select_action(state)
 
@@ -92,18 +106,22 @@ def test():
             #######
 
             # Append to log file
-            logs['action'].append(action)
+            if log_results:
+                logs['action'].append(action)
 
             state, reward, done, _ = env.step(action)
             ep_reward += reward
 
             # Append to log file
-            aux_state = state.copy()
-            aux_state[3] = aux_state[3]*100
-            logs['new_state'].append(aux_state)
-            logs['reward'].append(reward)
-            logs['done'].append(done)
-            logs['angle_after_act'].append(env.get_current_angle())
+            if log_results:
+                aux_state = state.copy()
+                aux_state[3] = aux_state[3]*100
+                logs['new_state'].append(aux_state)
+                logs['reward'].append(reward)
+                logs['done'].append(done)
+                logs['angle_after_act'].append(env.get_current_angle())
+                # logs['sucess'].append(done - env.get_drop_bool())
+
 
             if render:
                 env.render()
@@ -120,23 +138,14 @@ def test():
             f"\t Real : {int(env.get_current_angle())} "
             f"\t Target : {env.get_desired_angle()} \t Sucess : {done - env.get_drop_bool()}")
 
+
     env.close()
 
     # Save log file into a csv
-    logs_df = pd.DataFrame(logs)
-    logs_df.to_csv('logs/logs.csv', index=False)
-
-
-def rescale_action_space(scale_factor, action):
-    action_temp = np.zeros(8)
-    action_temp[parameters['model']['ppo_acting_joints']] = action * scale_factor
-
-    if action_temp[7] > 0:
-        action_temp[7] = 25
-    else:
-        action_temp[7] = -25
-    return action_temp
-
+    if log_results:
+        logs_df = pd.DataFrame(logs)
+        logs_df.to_csv('logs/logs.csv', index=False)
 
 if __name__ == '__main__':
-    test()
+    imputer = DataImputation()
+    test(imputer=imputer)

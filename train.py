@@ -7,6 +7,7 @@ import gym
 from PPO.PPO import PPO
 import pivoting_env
 import yaml
+from utils.utils import rescale_action_space
 
 # Read YAML file
 with open('./parameters.yaml', 'r') as file_descriptor:
@@ -229,18 +230,6 @@ def train():
     print("Finished training at (GMT) : ", end_time)
     print("Total training time  : ", end_time - start_time)
     print("============================================================================================")
-
-
-def rescale_action_space(scale_factor, action):
-    action_temp = np.zeros(8)
-    action_temp[parameters['model']['ppo_acting_joints']] = action * scale_factor
-
-    if action_temp[7] > 0:
-        action_temp[7] = 25
-    else:
-        action_temp[7] = -25
-    return action_temp
-
 
 if __name__ == '__main__':
     train()
